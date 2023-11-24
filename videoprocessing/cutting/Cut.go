@@ -24,7 +24,7 @@ func CutFile(inputFile, outputFile string, startTime, duration string) error {
 
 	err := cropVideo(inputFile, outputFile, startTime, duration)
 	if err != nil {
-		logger.Logger.Error("Error cropping video:", err)
+		logger.Logger.Error("Cut.go 27:Error cropping video:", err)
 		return err
 	}
 	logger.Logger.Info("Video cropped successfully")

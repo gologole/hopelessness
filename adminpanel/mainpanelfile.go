@@ -5,8 +5,9 @@ import (
 	"main.go/adminpanel/panelfuncs"
 )
 
-//Чтобы добавить страницу-создатить menufunc и массив структур для неё
-//Чтобы добавить функцию -добавить структуру
+// Чтобы добавить страницу-создатить menufunc и массив структур для неё
+// Чтобы добавить функцию -добавить структуру
+// добавить проверку изменений с гитхаба и версию
 
 type f struct {
 	num      int
@@ -15,13 +16,15 @@ type f struct {
 }
 
 var ( //главная страница
-	instance1 = f{1, "Открыть меню логера", panelfuncs.OpenLogger}
-	instance2 = f{2, "Мониторинг ресурсов и состояния", panelfuncs.MonitorResourcesAndState}
-	instance3 = f{3, "Планирование работы сервера", panelfuncs.PlanServerWork}
-	instance4 = f{4, "Включить/выключить сервер", panelfuncs.ToggleServer}
+	instance1 = f{1, "Открыть меню логера(пока просто вывод записей) ", panelfuncs.OpenLogger}
+	instance2 = f{2, "Мониторинг ресурсов и состояния-", panelfuncs.MonitorResourcesAndState}
+	instance3 = f{3, "Планирование работы сервера-", panelfuncs.PlanServerWork}
+	instance4 = f{4, "Включить/выключить сервер-", panelfuncs.ToggleServer}
+	instance5 = f{5, "Обработать видео с замаем", panelfuncs.TestProcessing}
+	instance6 = f{6, "скачать ffmpeg(один раз точно сработало)", panelfuncs.DownloadFFMPEG}
 )
 
-var flist1 = []f{instance1, instance2, instance3, instance4}
+var flist1 = []f{instance1, instance2, instance3, instance4, instance5, instance6}
 
 func rangef(flist []f) {
 	for _, f := range flist {

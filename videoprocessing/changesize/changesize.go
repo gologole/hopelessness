@@ -12,7 +12,7 @@ func ChangeSize(inputfile string, outputfile string, width int, height int) erro
 	}
 	err = first.Resize(int64(width), int64(height)).Output(outputfile).Run()
 	if err != nil {
-		logger.Logger.Error("Ошибка в RUn", err)
+		logger.Logger.Error("Ошибка в Run", err)
 		return err
 	}
 	logger.Logger.Info("Изменен размер видео", inputfile)

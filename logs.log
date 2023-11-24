@@ -1,2 +1,0 @@
-
-time="2023-11-16T15:27:28+07:00" level=error msg="Ошибка в RUnexec: \"ffmpeg\": executable file not found in %PATH%"
