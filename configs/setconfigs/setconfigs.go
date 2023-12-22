@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-var scriptPath = "C:\\Users\\nikit\\Desktop\\ИС\\ffmpeg_install.ps1" //засунуть в конфигурации
+var scriptPath = "C:\\Users\\Никита\\Desktop\\remakeProj\\script.ps1" //засунуть в конфигурации
 
 func SetPATH(scriptpath1 string) {
 	// Путь к скрипту ffmpeg_install.ps1
@@ -38,7 +38,6 @@ func SetPATH(scriptpath1 string) {
 			fmt.Println("Ошибка в запуске скрипта автоустановки ffmpeg и PATH:", err)
 		}
 	}
-
 }
 
 //

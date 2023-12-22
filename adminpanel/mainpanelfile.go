@@ -16,11 +16,11 @@ type f struct {
 }
 
 var ( //главная страница
-	instance1 = f{1, "Открыть меню логера(пока просто вывод записей) ", panelfuncs.OpenLogger}
-	instance2 = f{2, "Мониторинг ресурсов и состояния-", panelfuncs.MonitorResourcesAndState}
-	instance3 = f{3, "Планирование работы сервера-", panelfuncs.PlanServerWork}
+	instance1 = f{1, "Открыть меню логера", panelfuncs.OpenLogger}
+	instance2 = f{2, "-----Мониторинг ресурсов и состояния-", panelfuncs.MonitorResourcesAndState}
+	instance3 = f{3, "-----Планирование работы сервера-", panelfuncs.PlanServerWork}
 	instance4 = f{4, "Включить/выключить сервер-", panelfuncs.ToggleServer}
-	instance5 = f{5, "Обработать видео с замаем", panelfuncs.TestProcessing}
+	instance5 = f{5, "Тест обработки видео", panelfuncs.TestProcessing}
 	instance6 = f{6, "скачать ffmpeg(один раз точно сработало)", panelfuncs.DownloadFFMPEG}
 )
 
@@ -44,8 +44,11 @@ func mainmenu() {
 	fmt.Println("Доступные функции админ-панели:")
 	rangef(flist1)
 	var a int
-	fmt.Scan(&a)
-	//if(a!=) проверка на валидность значения
+	b, err := fmt.Scan(&a)
+	if err != nil {
+		fmt.Println("ВВедите валидное значение", b)
+		mainmenu()
+	}
 	usefunc(a, flist1)
 }
 

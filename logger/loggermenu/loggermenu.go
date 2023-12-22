@@ -2,41 +2,71 @@ package loggermenu
 
 import (
 	"fmt"
+	"log"
 	"main.go/configs"
-	"main.go/logger"
 	"os"
+	"os/exec"
 )
 
 var logfile = configs.NameofLogfile
+var a int
 
-func ClearLogs() {
-	var a string
-	fmt.Println("Вы точно хотите стереть что-то из логов?y/n")
+func LoggerMenu() {
+	fmt.Println("введите 1 если хотите открыть логи в файле(не работает)" +
+		"введите 2 если хотите вывести логи в консоль" +
+		"введите 3 если хотите очистить логи")
+
 	fmt.Scan(&a)
-	if !(a == "y" || a == "n") {
-		ClearLogs()
+	if a == 1 {
+		OpenLogFile()
 	}
-	if a == "n" {
-		return
+	if a == 2 {
+		OpenLogger()
+		fmt.Scan()
 	}
+	if a == 3 {
+		err := ClearLogs("logs.log")
+		if err != nil {
+			fmt.Println("Кто-то удалил файл логов")
+		}
+	}
+}
 
-	fmt.Println("Вы хотите очистить логи полностью?y/n")
-	fmt.Scan(&a)
-	if !(a == "y" || a == "n") {
-		ClearLogs()
-	}
-	//УДАЛЕНИЕ КАКОГО ТО КОЛВА ЛОГОВ
-	if a == "n" {
-		return
-	}
+func OpenLogFile() {
+	filePath := "logs.log"
 
-	fmt.Println("Стераю всё")
-	f, err := os.Open("logs.log")
+	// Открываем файл с использованием программы по умолчанию для просмотра файла
+	err := exec.Command("open", filePath).Start()
+
 	if err != nil {
-		logger.Logger.Error("ПРоблема в открытии файла с логами:", err)
+		log.Fatal(err)
 	}
-	defer f.Close()
-	//удаление всего тек
+}
+
+func ClearLogs(filename string) error {
+	// Открываем файл для чтения
+	file, err := os.OpenFile(filename, os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Очищаем содержимое файла
+	if err := file.Truncate(0); err != nil {
+		return err
+	}
+
+	// Перемещаем указатель в начало файла
+	if _, err := file.Seek(0, 0); err != nil {
+		return err
+	}
+
+	// Записываем пустую строку в файл
+	if _, err := file.WriteString(""); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func OpenLogger() {
@@ -56,4 +86,5 @@ func OpenLogger() {
 		return
 	}
 	fmt.Println(string(data))
+	fmt.Scan(&a)
 }
