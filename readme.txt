@@ -1,0 +1,1 @@
+https://www.ffmpeg.org/ffmpeg.html документация по ffmpeg,которую я никогда не прочитаю
