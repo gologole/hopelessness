@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Загрузка и обрезка видео</title>
+</head>
+<body>
+<h1>Загрузка и обрезка видео</h1>
+<form id="uploadForm" enctype="multipart/form-data">
+    <label for="video">Выберите видео:</label>
+    <input type="file" name="video" id="video" required>
+    <br>
+    <label for="startTime">Начальное время (в секундах):</label>
+    <input type="number" name="startTime" id="startTime" required>
+    <br>
+    <label for="endTime">Конечное время (в секундах):</label>
+    <input type="number" name="endTime" id="endTime" required>
+    <br>
+    <label for="resolution">Желаемое разрешение через пробел:</label>
+    <input type="text" name="resolution" id="resolution" required>
+    <br>
+    <input type="submit" value="Отправить">
+</form>
+
+<div id="result"></div>
+
+<!-- Добавляем кнопку скачать видео -->
+<a href="/video" id="downloadButton" download="video.mp4" disabled>Скачать видео</a>
+
+<script>
+    document.getElementById("uploadForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        var form = document.getElementById("uploadForm");
+        var formData = new FormData(form);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/process", true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                // Перенаправляем на /video, пока не начнется загрузка видеофайла
+                window.location.href = "/video";
+            }
+        };
+        xhr.send(formData);
+    });
+
+    // Функция для скачивания видео
+    function downloadVideo() {
+        // Создаем ссылку
+        var link = document.createElement("a");
+        link.href = "/video"; // Устанавливаем ссылку на серверный файл
+        link.download = "video.mp4"; // Устанавливаем имя файла для скачивания
+        link.click(); // Выполняем клик по ссылке для скачивания
+    }
+
+    document.getElementById("downloadButton").addEventListener("click", downloadVideo);
+</script>
+</body>
+</html>

@@ -17,14 +17,13 @@ type f struct {
 
 var ( //главная страница
 	instance1 = f{1, "Открыть меню логера", panelfuncs.OpenLogger}
-	instance2 = f{2, "-----Мониторинг ресурсов и состояния-", panelfuncs.MonitorResourcesAndState}
-	instance3 = f{3, "-----Планирование работы сервера-", panelfuncs.PlanServerWork}
-	instance4 = f{4, "Включить/выключить сервер-", panelfuncs.ToggleServer}
-	instance5 = f{5, "Тест обработки видео", panelfuncs.TestProcessing}
-	instance6 = f{6, "скачать ffmpeg(один раз точно сработало)", panelfuncs.DownloadFFMPEG}
+	instance2 = f{2, "Планирование работы сервера", panelfuncs.PlanServerWork}
+	instance3 = f{3, "Включить/выключить сервер и сайт", panelfuncs.ToggleServer}
+	instance4 = f{4, "Тест обработки видео", panelfuncs.TestProcessing}
+	instance5 = f{5, "скачать ffmpeg(один раз точно сработало)", panelfuncs.DownloadFFMPEG}
 )
 
-var flist1 = []f{instance1, instance2, instance3, instance4, instance5, instance6}
+var flist1 = []f{instance1, instance2, instance3, instance4, instance5}
 
 func rangef(flist []f) {
 	for _, f := range flist {

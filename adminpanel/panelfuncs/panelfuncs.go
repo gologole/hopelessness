@@ -13,10 +13,6 @@ func OpenLogger() {
 
 }
 
-func MonitorResourcesAndState() {
-	fmt.Println("Не работает")
-}
-
 func PlanServerWork() {
 	fmt.Println("не работает")
 }

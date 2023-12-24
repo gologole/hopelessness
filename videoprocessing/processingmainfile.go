@@ -26,7 +26,7 @@ type Videoinfo struct {
 	URL       string
 }
 
-var ScoreVideo int
+var ScoreVideo int = 1
 
 func ProcessVideo(videostruct Videoinfo) (Videoinfo, string, error) {
 	format := ".mp4"
@@ -51,6 +51,9 @@ func goProcessVideo(filename string, outputfile string, videostruct Videoinfo) (
 			outputfile,
 			videostruct.Starttime,
 			videostruct.Endtime)
+		if err != nil {
+			return videostruct, outputfile, err
+		}
 	}
 
 	if videostruct.Flag == 2 {
@@ -60,32 +63,34 @@ func goProcessVideo(filename string, outputfile string, videostruct Videoinfo) (
 			videostruct.Newheight,
 			videostruct.Newwidth,
 		)
+		if err != nil {
+			return videostruct, outputfile, err
+		}
 	}
 
 	if videostruct.Flag == 3 {
-		err = CutVideo(
+		er := CutVideo(
 			filename,
 			outputfile,
 			videostruct.Starttime,
 			videostruct.Endtime)
-		//изменяется размер необработанного видоса
 		os.Remove(filename)
-		err = ChangeSize(
+		er = ChangeSize(
 			outputfile,
 			filename,
 			videostruct.Newheight,
 			videostruct.Newwidth,
 		)
 		os.Remove(outputfile)
-		if err != nil {
-			return videostruct, filename, err
+		if er != nil {
+			return videostruct, filename, er
 		}
-		return videostruct, outputfile, nil
+		return videostruct, filename, nil
 	}
 
 	go os.Remove(filename)
 	if err != nil {
-		return videostruct, outputfile, err
+		return videostruct, filename, err
 	}
 	return videostruct, outputfile, nil
 }
