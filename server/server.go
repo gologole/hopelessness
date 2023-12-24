@@ -26,11 +26,11 @@ var mux = http.NewServeMux()
 
 func StartServer() {
 	//mux := http.NewServeMux()
-	mux.HandleFunc("/", indexHandler)
+	mux.HandleFunc("/site", indexHandler)
 	mux.HandleFunc("/process", processVideo)
 	mux.HandleFunc("/catchvideo", gocatchvideo)
 	mux.HandleFunc("/video", videoHandler)
-	//	mux.HandleFunc("/sendlogs", sendlogs)
+	mux.HandleFunc("/sendlogs", sendlogs)
 	fmt.Println("Сервер запущен")
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
@@ -56,7 +56,7 @@ func gocatchvideo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Logger.Info("Принят запрос : ", video)
-	sum := crc32.ChecksumIEEE(video.Bytevideo)
+	sum := CalculateCrc32(video.Bytevideo)
 	if video.Hash == sum {
 		//отправка ответа внутри
 		logger.Logger.Info("хэш суммы сошлись")
@@ -80,7 +80,6 @@ func SendReq(video Videoinfo, filename string) {
 
 	//составления структуры ответа
 	var sb RequestStruct
-	sb.UserID = video.UserID
 
 	arrbyte, err := byte2.VideoToBytes(filename)
 	a := len(arrbyte) < 5
@@ -90,7 +89,7 @@ func SendReq(video Videoinfo, filename string) {
 	}
 	sb.Bytevideo = arrbyte
 
-	sb.Hash = crc32.ChecksumIEEE(arrbyte)
+	sb.Hash = CalculateCrc32(arrbyte)
 
 	data, err := json.Marshal(sb)
 	r := bytes.NewReader(data) //хз поч он требует ридер ,а не пустой интерфейс
@@ -215,4 +214,21 @@ func DeleteFile(file string, fileToClose io.Closer) {
 	time.Sleep(30 * time.Minute)
 	fileToClose.Close()
 	os.Remove(file)
+}
+
+func sendlogs(w http.ResponseWriter, r *http.Request) {
+	// Открываем файл logs.log
+	file, err := ioutil.ReadFile("logs.log")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Ошибка чтения файла: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+
+	// Отправляем содержимое файла в запросе
+	w.Write(file)
+}
+func CalculateCrc32(data []byte) uint32 {
+	crc := crc32.NewIEEE()
+	crc.Write(data)
+	return crc.Sum32()
 }

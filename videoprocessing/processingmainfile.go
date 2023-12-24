@@ -9,7 +9,6 @@ import (
 )
 
 type RequestStruct struct {
-	UserID    int
 	Bytevideo []byte
 	Hash      uint32
 }
