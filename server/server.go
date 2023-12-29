@@ -10,6 +10,8 @@ import (
 	"main.go/logger"
 	"main.go/videoprocessing"
 	byte2 "main.go/videoprocessing/byte"
+	"main.go/videoprocessing/changesize"
+	"main.go/videoprocessing/cutting"
 	"net/http"
 	"os"
 	"strconv"
@@ -22,6 +24,7 @@ var finalfile string
 type Videoinfo = videoprocessing.Videoinfo
 type RequestStruct = videoprocessing.RequestStruct
 
+var outputvideo string //для закачки видео
 var mux = http.NewServeMux()
 
 func StartServer() {
@@ -31,6 +34,7 @@ func StartServer() {
 	mux.HandleFunc("/catchvideo", gocatchvideo)
 	mux.HandleFunc("/video", videoHandler)
 	mux.HandleFunc("/sendlogs", sendlogs)
+	mux.HandleFunc("/jsonreq", jsonRequestHandler)
 	fmt.Println("Сервер запущен")
 	err := http.ListenAndServe(":8080", mux)
 	if err != nil {
@@ -60,7 +64,7 @@ func gocatchvideo(w http.ResponseWriter, r *http.Request) {
 	if video.Hash == sum {
 		//отправка ответа внутри
 		logger.Logger.Info("хэш суммы сошлись")
-		videostruct, outputfile, _ := videoprocessing.ProcessVideo(video)
+		videostruct, outputfile := videoprocessing.ProcessVideo(video)
 
 		SendReq(videostruct, outputfile)
 		err := os.Remove(outputfile)
@@ -113,7 +117,7 @@ func TestProcess() {
 	fmt.Scan(&a, &b)
 	a1 := secondsToTimeString(a)
 	b1 := secondsToTimeString(b)
-	err := videoprocessing.CutVideo("zamay.mp4", "output.mp4", a1, b1)
+	err := cutting.CutFile("zamay.mp4", "output.mp4", a1, b1)
 	if err != nil {
 		fmt.Println("Обработка ошибки")
 	}
@@ -121,7 +125,7 @@ func TestProcess() {
 	fmt.Println("введите в какое качество вы хотите зашакалить видео ,где замай благославляет валю карнавал ")
 	fmt.Scan(&a, &b)
 
-	err = videoprocessing.ChangeSize("output.mp4", "theEnd.mp4", a, b)
+	err = changesize.ChangeSize("output.mp4", "theEnd.mp4", a, b)
 	if err != nil {
 		fmt.Println("Обработка ошибки")
 	}
@@ -170,10 +174,13 @@ func processVideo(w http.ResponseWriter, r *http.Request) {
 	videostruct.Flag = 3
 
 	arr, _ := byte2.VideoToBytes(header.Filename)
-	videostruct.Bytevideo = arr
-	fmt.Println(videostruct)
+	os.Remove(header.Filename)
 
-	_, finalfile, err = videoprocessing.ProcessVideo(videostruct)
+	videostruct.Bytevideo = arr
+	//fmt.Println(videostruct)
+
+	_, finalfile = videoprocessing.ProcessVideo(videostruct)
+	outputvideo = finalfile
 	w.WriteHeader(200)
 	go DeleteFile(finalfile, file)
 
@@ -202,12 +209,68 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "video/mp4")
+	w.Header().Set("Content-Type", outputvideo)
 	w.Header().Set("attachment; filename=video.mp4", "attachment; filename=video.mp4")
 	w.Header().Set("Content-Length", strconv.FormatInt(fileInfo.Size(), 10))
 
 	// Отправьте содержимое файла в ответ
 	io.Copy(w, file)
+}
+
+func jsonRequestHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	body, err := ioutil.ReadAll(r.Body) //УСТАРЕЛ????????????
+	if err != nil {
+		logger.Logger.Error("ошибка чтения бади ", err)
+		http.Error(w, "Ошибка чтения тела запроса", http.StatusBadRequest)
+		return
+	}
+	// Декодирование JSON из тела запроса в структуру Videoinfo
+	var video Videoinfo
+	fmt.Println(string(body))
+	err = json.Unmarshal(body, &video)
+	if err != nil {
+		logger.Logger.Error("ошибка декодирования бади :", err)
+		http.Error(w, "Ошибка декодирования JSON", http.StatusBadRequest)
+		return
+	}
+	logger.Logger.Info("Принят запрос : ", video)
+	sum := CalculateCrc32(video.Bytevideo)
+	if video.Hash == sum {
+		//отправка ответа внутри
+		logger.Logger.Info("хэш суммы сошлись")
+		_, outputfile := videoprocessing.ProcessVideo(video)
+
+		var sb RequestStruct
+
+		arrbyte, err := byte2.VideoToBytes(outputfile)
+		a := len(arrbyte) < 5
+		logger.Logger.Info("массив видео пустой = ", a)
+		if err != nil {
+			logger.Logger.Error("Проблема перевода видео в байты", err)
+		}
+		sb.Bytevideo = arrbyte
+
+		sb.Hash = CalculateCrc32(arrbyte)
+
+		data, err := json.Marshal(sb)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Write(data)
+		//err = os.Remove(outputfile)
+		if err != nil {
+			fmt.Println("НЕ УДАЛОСЬ УДАЛИТЬ ФАЙЛ ПОСЛЕ ОТПРАВКИ")
+			logger.Logger.Error("НЕ УДАЛОСЬ УДАЛИТЬ ФАЙЛ ПОСЛЕ ОТПРАВКИ ", err)
+		}
+
+	} else {
+		http.Error(w, "Хэш не сошелся", http.StatusTeapot)
+		logger.Logger.Error("Хэш суммы не сошлись")
+	}
+
 }
 
 func DeleteFile(file string, fileToClose io.Closer) {

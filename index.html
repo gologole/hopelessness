@@ -79,15 +79,22 @@
 
 <div id="result"></div>
 
-<!-- Добавляем кнопку скачать видео -->
-<a href="/video" id="downloadButton" download="video.mp4" disabled>Скачать видео</a>
-
 <script>
     document.getElementById("uploadForm").addEventListener("submit", function(event) {
         event.preventDefault();
 
         var form = document.getElementById("uploadForm");
         var formData = new FormData(form);
+
+        // Проверка валидности значений
+        var startTime = document.getElementById("startTime").value;
+        var endTime = document.getElementById("endTime").value;
+        var resolution = document.getElementById("resolution").value;
+
+        if (isNaN(startTime) || isNaN(endTime) || startTime < 0 || endTime < 0 || resolution.indexOf(' ') === -1) {
+            alert("Пожалуйста, введите корректные значения для начального и конечного времени (должны быть положительными числами) и разрешение (разделено пробелом).");
+            return;
+        }
 
         var xhr = new XMLHttpRequest();
         xhr.open("POST", "/process", true);
